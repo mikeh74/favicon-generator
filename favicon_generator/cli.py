@@ -1,4 +1,4 @@
-"""Command-line interface for favicon-generator."""
+"""Command-line interface for favigen."""
 
 import sys
 from pathlib import Path
@@ -27,11 +27,11 @@ def main(input_file, output, crop):
     
     Examples:
     
-        favicon-generator image.png
+        favigen image.png
         
-        favicon-generator image.jpg -o my-favicon.ico
+        favigen image.jpg -o my-favicon.ico
         
-        favicon-generator image.webp --crop -o favicon.ico
+        favigen image.webp --crop -o favicon.ico
     """
     try:
         input_path = Path(input_file)

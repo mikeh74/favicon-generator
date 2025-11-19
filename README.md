@@ -7,13 +7,13 @@ A Python CLI tool to generate .ico favicon files from images (JPEG, PNG, or WEBP
 Install using pipx (recommended):
 
 ```bash
-pipx install favicon-generator
+pipx install favigen
 ```
 
 Or install with pip:
 
 ```bash
-pip install favicon-generator
+pip install favigen
 ```
 
 For development:
@@ -27,7 +27,7 @@ pip install -e .
 Basic usage:
 
 ```bash
-favicon-generator image.png
+favigen image.png
 ```
 
 This will create `image.ico` in the same directory.
@@ -35,13 +35,13 @@ This will create `image.ico` in the same directory.
 Specify a custom output filename:
 
 ```bash
-favicon-generator image.jpg -o my-favicon.ico
+favigen image.jpg -o my-favicon.ico
 ```
 
 Crop image to square before processing:
 
 ```bash
-favicon-generator image.webp --crop -o favicon.ico
+favigen image.webp --crop -o favicon.ico
 ```
 
 ### Options
