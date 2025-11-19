@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.scripts]
-favicon-generator = "favicon_generator.cli:main"
+favigen = "favicon_generator.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/mikeh74/favicon-generator"
