@@ -73,9 +73,7 @@ favigen image.jpg --app-icons --crop
 | `apple-touch-icon.png` | 180×180 | iOS home screen icon |
 | `android-chrome-192x192.png` | 192×192 | Android home screen icon |
 | `android-chrome-512x512.png` | 512×512 | Android splash / PWA icon |
-| `mstile-150x150.png` | 150×150 | Windows Start menu tile |
 | `site.webmanifest` | — | Web app manifest (PWA) |
-| `browserconfig.xml` | — | Microsoft browser tile config |
 | `README.md` | — | Usage instructions and HTML snippets |
 
 ### Options
@@ -97,7 +95,7 @@ favigen image.jpg --app-icons --crop
 
 - Converts images to multi-resolution .ico files
 - Generates a full app icon bundle (`.tar.gz`) covering browsers, Apple, Android, and Windows
-- Bundle includes `site.webmanifest`, `browserconfig.xml`, and a README with HTML snippets
+- Bundle includes `site.webmanifest` and a README with HTML snippets
 - Supports common image formats (JPEG, PNG, WEBP)
 - Optional center-crop to square
 - Custom output filenames

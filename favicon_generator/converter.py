@@ -19,8 +19,6 @@ APP_ICON_SIZES = [
     # Android / Chrome
     (192, 192, "android-chrome-192x192.png"),
     (512, 512, "android-chrome-512x512.png"),
-    # Microsoft tile
-    (150, 150, "mstile-150x150.png"),
 ]
 
 SITE_WEBMANIFEST = {
@@ -43,18 +41,6 @@ SITE_WEBMANIFEST = {
     "display": "standalone",
 }
 
-BROWSERCONFIG_XML = """\
-<?xml version="1.0" encoding="utf-8"?>
-<browserconfig>
-    <msapplication>
-        <tile>
-            <square150x150logo src="/mstile-150x150.png"/>
-            <TileColor>#ffffff</TileColor>
-        </tile>
-    </msapplication>
-</browserconfig>
-"""
-
 BUNDLE_README = """\
 # App Icons
 
@@ -71,9 +57,7 @@ This package contains a full set of icons for use with websites and web apps.
 | `apple-touch-icon.png` | 180×180 | iOS home screen icon |
 | `android-chrome-192x192.png` | 192×192 | Android home screen icon |
 | `android-chrome-512x512.png` | 512×512 | Android splash / PWA icon |
-| `mstile-150x150.png` | 150×150 | Windows Start menu tile |
 | `site.webmanifest` | — | Web app manifest (PWA) |
-| `browserconfig.xml` | — | Microsoft browser tile config |
 
 ## Usage
 
@@ -87,14 +71,12 @@ add the following snippet to the `<head>` of your HTML:
 <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-<meta name="msapplication-config" content="/browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
 ```
 
 ### Notes
 
 - Edit `site.webmanifest` to set your app `name`, `short_name`, and `theme_color`.
-- Edit `browserconfig.xml` to update the `TileColor` to match your brand colour.
 - For Next.js / Vite projects, place files in the `public/` directory.
 - For a plain HTML site, place files in the web root alongside `index.html`.
 """
@@ -194,9 +176,8 @@ def generate_app_icons_bundle(
 
     The archive contains:
       - favicon.ico (16, 32, 48 px multi-resolution)
-      - PNG icons at standard sizes for browsers, Apple, Android, and Windows
+      - PNG icons at standard sizes for browsers, Apple, and Android
       - site.webmanifest  (PWA web app manifest)
-      - browserconfig.xml (Microsoft tile config)
       - README.md         (usage instructions and HTML snippets)
 
     Args:
@@ -251,10 +232,6 @@ def generate_app_icons_bundle(
         manifest_path.write_text(
             json.dumps(SITE_WEBMANIFEST, indent=4), encoding="utf-8"
         )
-
-        # --- browserconfig.xml ---
-        browserconfig_path = tmp / "browserconfig.xml"
-        browserconfig_path.write_text(BROWSERCONFIG_XML, encoding="utf-8")
 
         # --- README.md ---
         readme_path = tmp / "README.md"

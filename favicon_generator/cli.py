@@ -73,9 +73,8 @@ def main(input_file, output, crop, app_icons):
             click.echo(f"✓ Successfully created {output_path}")
             click.echo(
                 "  Archive contains: favicon.ico, PNGs for"
-                " browser/Apple/Android/Windows,\n"
-                "  site.webmanifest, browserconfig.xml,"
-                " and README.md."
+                " browser/Apple/Android,\n"
+                "  site.webmanifest, and README.md."
             )
 
         else:
