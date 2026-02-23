@@ -30,7 +30,9 @@ from .converter import convert_to_ico, generate_app_icons_bundle
 @click.version_option()
 def main(input_file, output, crop, app_icons):
     """
-    Convert an image (JPEG, PNG, or WEBP) to .ico favicon format.
+    Convert an image (JPEG, PNG, WEBP, or SVG) to .ico favicon format.
+
+    SVG files are rasterised to 512 × 512 px before conversion.
 
     With --app-icons, generates a full set of web/app icons bundled into
     a .tar.gz archive including a README with usage instructions.
@@ -41,13 +43,15 @@ def main(input_file, output, crop, app_icons):
 
         favigen image.png
 
+        favigen logo.svg
+
         favigen image.jpg -o my-favicon.ico
 
         favigen image.webp --crop -o favicon.ico
 
         favigen image.png --app-icons
 
-        favigen image.png --app-icons -o my-icons.tar.gz --crop
+        favigen logo.svg --app-icons -o my-icons.tar.gz
     """
     try:
         input_path = Path(input_file)

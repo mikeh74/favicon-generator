@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "favicon-generator"
-version = "0.2.1"
+version = "0.3.0"
 description = "A CLI tool to generate .ico favicon files from images"
 readme = "README.md"
 authors = [
@@ -26,6 +26,8 @@ classifiers = [
 dependencies = [
     "Pillow>=10.0.0",
     "click>=8.0.0",
+    "svglib>=1.5.0",
+    "reportlab>=4.0.0",
 ]
 
 [project.scripts]

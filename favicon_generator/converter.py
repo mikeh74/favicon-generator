@@ -1,11 +1,14 @@
 """Core image processing module for converting images to .ico format."""
 
+import io
 import json
 import tarfile
 import tempfile
 from pathlib import Path
 from typing import Union
 from PIL import Image
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
 
 
 # Full set of app icon definitions: (width, height, filename)
@@ -82,6 +85,63 @@ add the following snippet to the `<head>` of your HTML:
 """
 
 
+def rasterize_svg(svg_path: Path, target_size: int = 512) -> Image.Image:
+    """
+    Rasterise an SVG file to a PIL Image.
+
+    The SVG is scaled so its longest dimension equals *target_size* pixels.
+    The returned image is in RGBA mode with a transparent background.
+
+    Args:
+        svg_path: Path to the .svg file.
+        target_size: Pixel size for the longest dimension (default 512).
+
+    Returns:
+        PIL Image in RGBA mode.
+
+    Raises:
+        ValueError: If the SVG file cannot be parsed.
+    """
+    drawing = svg2rlg(str(svg_path))
+    if drawing is None:
+        raise ValueError(f"Could not parse SVG file: {svg_path}")
+
+    longest = max(drawing.width, drawing.height)
+    if longest == 0:
+        raise ValueError(f"SVG has zero dimensions: {svg_path}")
+
+    scale = target_size / longest
+    drawing.width = drawing.width * scale
+    drawing.height = drawing.height * scale
+    drawing.transform = (scale, 0, 0, scale, 0, 0)
+
+    png_bytes = renderPM.drawToString(drawing, fmt="PNG", bg=-1)
+    img = Image.open(io.BytesIO(png_bytes))
+    return img.convert("RGBA")
+
+
+def _load_image(input_path: Path) -> Image.Image:
+    """
+    Open an image file and return a PIL Image in RGB or RGBA mode.
+
+    SVG files are rasterised via :func:`rasterize_svg`; all other
+    formats are opened directly with Pillow.
+
+    Args:
+        input_path: Path to the image file.
+
+    Returns:
+        PIL Image in RGBA mode (SVG / images with alpha) or RGB mode.
+    """
+    if input_path.suffix.lower() == ".svg":
+        return rasterize_svg(input_path)
+
+    img = Image.open(input_path)
+    if img.mode not in ("RGB", "RGBA"):
+        img = img.convert("RGBA")
+    return img
+
+
 def crop_to_square(image: Image.Image) -> Image.Image:
     """
     Crop an image to a square by taking the center portion.
@@ -135,7 +195,7 @@ def convert_to_ico(
         raise FileNotFoundError(f"Input file not found: {input_path}")
 
     # Validate input file format
-    supported_formats = {".jpg", ".jpeg", ".png", ".webp"}
+    supported_formats = {".jpg", ".jpeg", ".png", ".webp", ".svg"}
     if input_path.suffix.lower() not in supported_formats:
         raise ValueError(
             f"Unsupported file format: {input_path.suffix}. "
@@ -146,23 +206,20 @@ def convert_to_ico(
     if output_path.suffix.lower() != ".ico":
         output_path = output_path.with_suffix(".ico")
 
-    # Open and process the image
-    with Image.open(input_path) as img:
-        # Convert to RGB if necessary (ICO format requires RGB)
-        if img.mode not in ("RGB", "RGBA"):
-            img = img.convert("RGBA")
+    # Open and process the image (SVG is rasterised automatically)
+    img = _load_image(input_path)
 
-        # Crop to square if requested
-        if crop_square:
-            img = crop_to_square(img)
+    # Crop to square if requested
+    if crop_square:
+        img = crop_to_square(img)
 
-        # Save as .ico with multiple sizes for better compatibility
-        # Common favicon sizes: 16x16, 32x32, 48x48, 64x64, 128x128, 256x256
-        sizes = [
-            (16, 16), (32, 32), (48, 48),
-            (64, 64), (128, 128), (256, 256),
-        ]
-        img.save(output_path, format="ICO", sizes=sizes)
+    # Save as .ico with multiple sizes for better compatibility
+    # Common favicon sizes: 16x16, 32x32, 48x48, 64x64, 128x128, 256x256
+    sizes = [
+        (16, 16), (32, 32), (48, 48),
+        (64, 64), (128, 128), (256, 256),
+    ]
+    img.save(output_path, format="ICO", sizes=sizes)
 
 
 def generate_app_icons_bundle(
@@ -196,7 +253,7 @@ def generate_app_icons_bundle(
     if not input_path.exists():
         raise FileNotFoundError(f"Input file not found: {input_path}")
 
-    supported_formats = {".jpg", ".jpeg", ".png", ".webp"}
+    supported_formats = {".jpg", ".jpeg", ".png", ".webp", ".svg"}
     if input_path.suffix.lower() not in supported_formats:
         raise ValueError(
             f"Unsupported file format: {input_path.suffix}. "
@@ -209,23 +266,21 @@ def generate_app_icons_bundle(
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp = Path(tmp_dir)
 
-        with Image.open(input_path) as img:
-            # Normalise colour mode
-            if img.mode not in ("RGB", "RGBA"):
-                img = img.convert("RGBA")
+        # Open and process the image (SVG is rasterised automatically)
+        img = _load_image(input_path)
 
-            if crop_square:
-                img = crop_to_square(img)
+        if crop_square:
+            img = crop_to_square(img)
 
-            # --- favicon.ico (multi-resolution) ---
-            ico_path = tmp / "favicon.ico"
-            ico_sizes = [(16, 16), (32, 32), (48, 48)]
-            img.save(ico_path, format="ICO", sizes=ico_sizes)
+        # --- favicon.ico (multi-resolution) ---
+        ico_path = tmp / "favicon.ico"
+        ico_sizes = [(16, 16), (32, 32), (48, 48)]
+        img.save(ico_path, format="ICO", sizes=ico_sizes)
 
-            # --- PNG icons ---
-            for width, height, filename in APP_ICON_SIZES:
-                resized = img.resize((width, height), Image.LANCZOS)
-                resized.save(tmp / filename, format="PNG")
+        # --- PNG icons ---
+        for width, height, filename in APP_ICON_SIZES:
+            resized = img.resize((width, height), Image.LANCZOS)
+            resized.save(tmp / filename, format="PNG")
 
         # --- site.webmanifest ---
         manifest_path = tmp / "site.webmanifest"
